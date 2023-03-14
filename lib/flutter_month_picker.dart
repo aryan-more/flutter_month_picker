@@ -8,12 +8,7 @@ import 'package:intl/intl.dart';
 ///             should not be before lastDate
 /// lastDate: date where you want to stop
 ///
-Future<DateTime?> showMonthPicker({
-  required BuildContext context,
-  required DateTime initialDate,
-  required DateTime firstDate,
-  required DateTime lastDate,
-}) async {
+Future<DateTime?> showMonthPicker({required BuildContext context, required DateTime initialDate, required DateTime firstDate, required DateTime lastDate, Color? primary}) async {
   return await showDialog(
     context: context,
     builder: (context) {
@@ -21,6 +16,7 @@ Future<DateTime?> showMonthPicker({
         initialDate: initialDate,
         firstDate: firstDate,
         lastDate: lastDate,
+        primary: primary,
       );
     },
   );
@@ -30,12 +26,14 @@ class _MonthPicker extends StatefulWidget {
   final DateTime initialDate;
   final DateTime firstDate;
   final DateTime lastDate;
+  final Color? primary;
 
   const _MonthPicker({
     Key? key,
     required this.initialDate,
     required this.firstDate,
     required this.lastDate,
+    required this.primary,
   }) : super(key: key);
 
   @override
@@ -112,9 +110,8 @@ class __MonthPickerState extends State<_MonthPicker> {
 
   _buildHeader(ThemeData theme) {
     return Material(
-      color: Colors.blue,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(30.0))),
+      color: widget.primary ?? Colors.blue,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30.0))),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -123,7 +120,7 @@ class __MonthPickerState extends State<_MonthPicker> {
             Center(
               child: Text(
                 DateFormat.yMMM().format(_selectedDate),
-                style: theme.primaryTextTheme.subtitle1,
+                style: theme.primaryTextTheme.titleMedium,
               ),
             ),
             Row(
@@ -141,7 +138,7 @@ class __MonthPickerState extends State<_MonthPicker> {
                   ),
                 ),
                 DefaultTextStyle(
-                  style: theme.primaryTextTheme.headline5!,
+                  style: theme.primaryTextTheme.headlineSmall!,
                   child: (_isYearSelection)
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
@@ -234,12 +231,12 @@ class __MonthPickerState extends State<_MonthPicker> {
         },
       ),
       style: TextButton.styleFrom(
-        backgroundColor: isSelected ? Colors.blue : null,
-        primary: isSelected
+        foregroundColor: isSelected
             ? colorScheme.onPrimary
             : year == DateTime.now().year
-                ? Colors.blue
+                ? (widget.primary ?? Colors.blue)
                 : colorScheme.onSurface.withOpacity(0.8),
+        backgroundColor: isSelected ? (widget.primary ?? Colors.blue) : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
         ),
@@ -251,23 +248,20 @@ class __MonthPickerState extends State<_MonthPicker> {
   }
 
   _getMonthButton(DateTime date, ColorScheme colorScheme) {
-    bool isSelected =
-        date.month == _selectedDate.month && date.year == _selectedDate.year;
+    bool isSelected = date.month == _selectedDate.month && date.year == _selectedDate.year;
     final int isFirstDate = _firstDate.compareTo(date);
     final int isLastDate = _lastDate.compareTo(date);
 
-    VoidCallback? callback = (isFirstDate <= 0) && (isLastDate >= 0)
-        ? () => setState(() => _selectedDate = DateTime(date.year, date.month))
-        : null;
+    VoidCallback? callback = (isFirstDate <= 0) && (isLastDate >= 0) ? () => setState(() => _selectedDate = DateTime(date.year, date.month)) : null;
     return TextButton(
       onPressed: callback,
       style: TextButton.styleFrom(
-        backgroundColor: isSelected ? colorScheme.primary : null,
-        primary: isSelected
+        foregroundColor: isSelected
             ? colorScheme.onPrimary
             : date.month == DateTime.now().month
                 ? colorScheme.primary
                 : colorScheme.onSurface.withOpacity(0.8),
+        backgroundColor: isSelected ? colorScheme.primary : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
         ),
